@@ -7,8 +7,14 @@
  -}
 import Data.Complex
 
+convOne :: (Num a) => [a] -> [a] -> Int -> a
+convOne h x n    = sum (zipWith (*) kernel input)
+    where kernel = drop (-begin) (reverse h)
+          input  = drop begin x
+          begin  = n - length h + 1
+
 conv :: (Num a) => [a] -> [a] -> [a]
-conv h x = [sum (zipWith (*) (drop (max (-i) 0) (reverse h)) (drop (max i 0) x)) | i <- [(-(length h - 1))..(length x - 1)]]
+conv h x = [convOne h x n | n <- [0..(length x + length h - 2)]]
 
 convFft :: (RealFloat a) => [a] -> [a] -> [a]
 convFft h x
