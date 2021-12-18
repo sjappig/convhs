@@ -1,5 +1,7 @@
 # Convolution with Haskell
 
+Blog text available also at https://programmingwithjp.wordpress.com/2021/12/18/convolution-with-haskell/
+
 Haskell is a functional programming language [1], which I have learned during the last few years. I have a bit of experience
 also from other functional language Clojure [2], and for some reason I have found Haskell to make a lot more "sense"; can't
 really put my finger on it though why it feels better.
@@ -31,11 +33,11 @@ Armed with these observations, we can write our direct implementation for calcul
               input  = drop begin x
               begin  = n - length h + 1
 
-So there are few things here that probably need a bit of explanation. The first thing is the function zipWith. It
+So there are few things here that probably need a bit of explanation. The first thing is the function *zipWith*. It
 applies the given function (multiplication in this case) to the given lists; what is important for us, it works also
 when the given lists have different lengths. The second thing is how we implement the "sliding window" of the
 convolution. For the first values of n, only the last elements of the reversed kernel are used; after the whole kernel
-is in use, we should start to shift the input. Again the the Haskell functions work in our favour. Function drop is
+is in use, we should start to shift the input. Again the the Haskell functions work in our favour. Function *drop* is
 fine with receiving negative number (it does not drop anything), or number greater than the list length (it results
 empty list).
 
@@ -134,7 +136,9 @@ used, the differences won't show up. We will use *replicate* to fill up the list
 
 So the values look first bit weird, but they are only suffering from the numerical inaccuracies, since the
 implementation does now a decent amount of complicated floating point math. But when the values are compared to ones we
-got with the naive implementation we can see they match. Hooray again!
+got with the naive implementation we can see they match.
+
+Hooray again!
 
 ## References
 
