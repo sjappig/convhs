@@ -16,16 +16,11 @@ convOne h x n    = sum (zipWith (*) kernel input)
 conv :: (Num a) => [a] -> [a] -> [a]
 conv h x = [convOne h x n | n <- [0..(length x + length h - 2)]]
 
-convFft :: (RealFloat a) => [a] -> [a] -> [a]
-convFft h x
-    | length x == length h = ifft (zipWith (*) (fft h) (fft x))
-    | otherwise = error "Kernel and input data must have the same length"
-
-fft :: (RealFloat a) => [a] -> [Complex a]
-fft x
-    | isPowerOfTwo n = fftRaw x n 1
-    | otherwise = error "FFT works only for powers of two"
-    where n = length x
+isPowerOfTwo :: Int -> Bool
+isPowerOfTwo 1 = True
+isPowerOfTwo x
+    | mod x 2 == 0 = isPowerOfTwo (div x 2)
+    | otherwise = False
 
 fftRaw :: (RealFloat a) => [a] -> Int -> Int -> [Complex a]
 fftRaw _ 0 _ = []
@@ -35,10 +30,10 @@ fftRaw x n s = zipWith (+) x1 x2 ++ (zipWith (-) x1 x2)
     where x1 = fftRaw x (div n 2) (2 * s)
           x2 = zipWith (*) [exp (0 :+ (-2 * pi * fromIntegral k / (fromIntegral n))) | k <- [0..((div n 2) - 1)]] (fftRaw (drop s x) (div n 2) (2 * s))
 
-ifft :: (RealFloat a) => [Complex a] -> [a]
-ifft x
-    | isPowerOfTwo n = [realPart v / (fromIntegral n) | v <- ifftRaw x n 1]
-    | otherwise = error "IFFT works only for powers of two"
+fft :: (RealFloat a) => [a] -> [Complex a]
+fft x
+    | isPowerOfTwo n = fftRaw x n 1
+    | otherwise = error "FFT works only for powers of two"
     where n = length x
 
 ifftRaw :: (RealFloat a) => [Complex a] -> Int -> Int -> [Complex a]
@@ -49,8 +44,13 @@ ifftRaw x n s = zipWith (+) x1 x2 ++ (zipWith (-) x1 x2)
     where x1 = ifftRaw x (div n 2) (2 * s)
           x2 = zipWith (*) [exp (0 :+ (2 * pi * fromIntegral k / (fromIntegral n))) | k <- [0..((div n 2) - 1)]] (ifftRaw (drop s x) (div n 2) (2 * s))
 
-isPowerOfTwo :: Int -> Bool
-isPowerOfTwo 1 = True
-isPowerOfTwo x
-    | mod x 2 == 0 = isPowerOfTwo (div x 2)
-    | otherwise = False
+ifft :: (RealFloat a) => [Complex a] -> [a]
+ifft x
+    | isPowerOfTwo n = [realPart v / (fromIntegral n) | v <- ifftRaw x n 1]
+    | otherwise = error "IFFT works only for powers of two"
+    where n = length x
+
+convFft :: (RealFloat a) => [a] -> [a] -> [a]
+convFft h x
+    | length x == length h = ifft (zipWith (*) (fft h) (fft x))
+    | otherwise = error "Kernel and input data must have the same length"
